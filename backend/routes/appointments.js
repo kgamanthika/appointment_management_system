@@ -1,47 +1,27 @@
 const express = require('express');
-const db = require('../config/db');
+const Appointment = require('../models/Appointment');
+const authMiddleware = require('../middleware/authMiddleware');
+
 const router = express.Router();
 
-// Get available slots
-router.get('/slots', (req, res) => {
-  db.query("SELECT * FROM slots WHERE booked = 0", (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
+// Protect these routes with authentication middleware
+router.post('/', authMiddleware, async (req, res) => {
+  const { userId, slotId } = req.body;
+  try {
+    const appointment = await Appointment.create({ userId, slotId });
+    res.status(201).json(appointment);
+  } catch (error) {
+    res.status(400).json({ message: 'Error booking appointment', error });
+  }
 });
 
-// Book an appointment
-router.post('/appointments', (req, res) => {
-  const { userName, contact, slotId } = req.body;
-
-  db.query("UPDATE slots SET booked = 1, user_name = ?, contact = ? WHERE id = ? AND booked = 0",
-    [userName, contact, slotId], (err, result) => {
-      if (err) return res.status(500).json({ error: err.message });
-      if (result.affectedRows === 0) return res.status(400).json({ message: "Slot already booked" });
-      res.json({ message: "Appointment booked successfully!" });
-    }
-  );
-});
-
-// Get user appointments
-router.get('/appointments', (req, res) => {
-  db.query("SELECT * FROM slots WHERE booked = 1", (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
-});
-
-// Cancel an appointment
-router.delete('/appointments/:id', (req, res) => {
-  const { id } = req.params;
-  
-  db.query("UPDATE slots SET booked = 0, user_name = NULL, contact = NULL WHERE id = ? AND booked = 1",
-    [id], (err, result) => {
-      if (err) return res.status(500).json({ error: err.message });
-      if (result.affectedRows === 0) return res.status(400).json({ message: "No appointment found" });
-      res.json({ message: "Appointment cancelled successfully!" });
-    }
-  );
+router.get('/', authMiddleware, async (req, res) => {
+  try {
+    const appointments = await Appointment.findAll({ where: { userId: req.user.id } });
+    res.json(appointments);
+  } catch (error) {
+    res.status(400).json({ message: 'Error fetching appointments', error });
+  }
 });
 
 module.exports = router;
