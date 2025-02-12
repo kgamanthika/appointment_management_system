@@ -1,13 +1,18 @@
-const express = require('express');
-const cors = require('cors');
-const authRoutes = require('./routes/auth');
-const appointmentRoutes = require('./routes/appointments');
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import express from 'express';
+import appointmentRoutes from './routes/appointmentRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
+app.use(cors());
+app.use(bodyParser.json());
+
+// Use routes
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);
 
-app.listen(5000, () => console.log('Server running on port 5000'));
+app.listen(5000, () => {
+  console.log('Server running on port 5000');
+});
