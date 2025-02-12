@@ -1,47 +1,47 @@
-import axios from "axios";
+import axios from 'axios';
 
-const API_BASE_URL = "http://localhost:5000"; // Change if backend runs on a different port
+const API_URL = 'http://localhost:5000/api';
 
-// Fetch available time slots
+// Get available time slots
 export const getAvailableSlots = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/slots`);
+    const response = await axios.get(`${API_URL}/slots`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching slots:", error);
+    console.error('Error fetching slots:', error);
     return [];
   }
 };
 
 // Book an appointment
-export const bookAppointment = async (appointmentData) => {
+export const bookAppointment = async (userName, contact, slotId) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/appointments`, appointmentData);
+    const response = await axios.post(`${API_URL}/appointments`, { userName, contact, slotId });
     return response.data;
   } catch (error) {
-    console.error("Error booking appointment:", error);
+    console.error('Error booking appointment:', error);
     return null;
   }
 };
 
 // Get user appointments
-export const getUserAppointments = async (userId) => {
+export const getUserAppointments = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/appointments?userId=${userId}`);
+    const response = await axios.get(`${API_URL}/appointments`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching appointments:", error);
+    console.error('Error fetching appointments:', error);
     return [];
   }
 };
 
 // Cancel an appointment
-export const cancelAppointment = async (appointmentId) => {
+export const cancelAppointment = async (id) => {
   try {
-    await axios.delete(`${API_BASE_URL}/appointments/${appointmentId}`);
-    return true;
+    const response = await axios.delete(`${API_URL}/appointments/${id}`);
+    return response.data;
   } catch (error) {
-    console.error("Error canceling appointment:", error);
-    return false;
+    console.error('Error canceling appointment:', error);
+    return null;
   }
 };
